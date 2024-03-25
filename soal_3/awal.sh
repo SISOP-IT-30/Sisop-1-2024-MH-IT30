@@ -1,4 +1,5 @@
 #!/bin/bash
+
 #Mendownload Zip dari link
 wget --content-disposition 'https://docs.google.com/uc?export=download&id=1oGHdTf4_76_RacfmQIV4i7os4sGwa9vN'
 unzip genshin.zip && unzip genshin_character.zip
@@ -6,6 +7,7 @@ unzip genshin.zip && unzip genshin_character.zip
 path="/home/PuroFuro/gingseng/genshin_character"
 mkdir "$path/Inazuma" && mkdir "$path/Mondstat" && mkdir "$path/Liyue" && mkdir "$path/Sumeru" && mkdir "$path/Fontaine"
 
+#For loop untuk mengganti nama file dan memasukan ke folder menurut region
 for file in $path/*.jpg; do
   
   #change hex to ascii
@@ -22,6 +24,7 @@ for file in $path/*.jpg; do
 
 done
 
+#Untuk menghitung jumlah weapon yang ada sesuai dengan tipe mereka
 awk '
 BEGIN { print "Weapon Count:" }
 /Claymore/  { ++l }
@@ -31,5 +34,5 @@ BEGIN { print "Weapon Count:" }
 /Sword/ { ++p }
 END { print "Claymore:"l "\nPolearm:"m "\nCatalyst:"n "\nBow:"o "\nSword:"p }' list_character.csv
 
-
+#Hapus file yang diminta
 rm -rf genshin_character.zip && rm -rf list_character.csv && rm -rf genshin.zip
