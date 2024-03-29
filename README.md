@@ -47,14 +47,7 @@ tampilkan_top_pembeli() {
 
 Skrip shell ini memiliki sebuah fungsi bernama `tampilkan_top_pembeli()` yang berfungsi untuk menampilkan nama pembeli dengan total penjualan tertinggi dari data yang terdapat dalam file `Sandbox.csv`.
 
-
-
-Mendapatkan Nama Pembeli dengan Total Penjualan Tertinggi
-bash
-
-`top_sales=$(tail -n +2 Sandbox.csv | awk -F ',' '{print $6 "," $17}' | sort -t ',' -k2 -nr | head -n 1)`
-
-Untuk Mendapatkan Nama Pembeli dengan Total Penjualan Tertinggi
+Untuk Mendapatkan Nama Pembeli dengan Total Penjualan Tertinggi :
 
 1. Baris `#!/bin/bash` menunjukkan bahwa skrip akan dijalankan oleh program Bash, yang merupakan program yang digunakan untuk mengeksekusi perintah-perintah dalam sistem operasi Unix/Linux.
 
