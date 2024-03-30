@@ -311,3 +311,320 @@ main() {
 
 main
 ```
+
+
+## [SOAL 3](https://docs.google.com/document/d/140T6O_YsbBcnblkKqQ5lpN1ji_XQzSMEpAkkqHrtTyU/edit)
+### Penjelasan awal.sh
+Hal awal yang dilakukan adalah download zip dari URL yang diberikan, melakukan unzip, membuat folder sesuai region dan membuat variabel $path agar bisa disubstitute.
+```
+#!/bin/bash
+
+#Mendownload Zip dari link
+wget --content-disposition 'https://docs.google.com/uc?export=download&id=1oGHdTf4_76_RacfmQIV4i7os4sGwa9vN'
+unzip genshin.zip && unzip genshin_character.zip
+
+path="/home/PuroFuro/gingseng/genshin_character"
+mkdir "$path/Inazuma" && mkdir "$path/Mondstat" && mkdir "$path/Liyue" && mkdir "$path/Sumeru" && mkdir "$path/Fontaine"
+```
+For loop dibawah ini digunakan untuk:
+- Mengubah nama file di dalam folder genshin_character dari hex menjadi ascii
+- Mengubah lagi namanya sesuai format yang ditentukan dengan bantuan file "list_character.csv". Secara garis besar, cara yang dipakai adalah mencari nama karakter dari file yang telah di-decode di "list_character.csv" lalu mencari region dari karakter tersebut dan diletakan ke dalam variabel. Lalu mengganti nama dari file menggunakan awk dengan mengganti urutan column. Akhirnya, letakan file tersebut ke folder region dengan bantuan variabel tadi.
+```
+#For loop untuk mengganti nama file dan memasukan ke folder menurut region
+for file in $path/*.jpg; do
+  
+  #change hex to ascii
+  name=$(echo "${file%.*}")
+  fix=$(echo "${name##*/}")
+  anjay=$(echo $fix | xxd -r -p)
+  mv -- "$path/$fix".jpg "$anjay".jpg
+
+  #change name and move to region
+  region=$(awk -F,  "/$anjay/"'{OFS=","; print $2}' list_character.csv)
+  change=$(awk -F,  "/$anjay/"'{OFS=",";print $2 "-" $1 "-" $3 "-" $4}' list_character.csv)
+  mv -- "$anjay.jpg" "$change".jpg
+  mv "$change".jpg "$path/$region"
+
+done
+```
+Menggunakan awk untuk mencari setiap tipe weapon yang muncul dan meng-assign setiap weapon dengan variabel yang akan di-increment setiap kali weapon tersebut muncul lalu di print. Setelah itu menghapus file-file yang diminta soal.
+```
+#Untuk menghitung jumlah weapon yang ada sesuai dengan tipe mereka
+awk '
+BEGIN { print "Weapon Count:" }
+/Claymore/  { ++l }
+/Polearm/ { ++m }
+/Catalyst/ { ++n }
+/Bow/ { ++o }
+/Sword/ { ++p }
+END { print "Claymore:"l "\nPolearm:"m "\nCatalyst:"n "\nBow:"o "\nSword:"p }' list_character.csv
+
+#Hapus file yang diminta
+rm -rf genshin_character.zip && rm -rf list_character.csv && rm -rf genshin.zip
+```
+### Terbentuknya folder dengan folder region tiap karakter yang sudah difilter saat awal.sh dijalankan serta perhitungan weapon di terminal
+![github-small](https://github.com/PuroFuro/image_for_sisop/blob/main/Screenshot_20240330_192228.png)
+
+### Folder Region setiap karakter
+![github-small](https://github.com/PuroFuro/image_for_sisop/blob/main/Screenshot_20240330_192239.png)
+
+### Penjelasan search.sh
+Simpelnya, yang dilakukan oleh kode ini adalah untuk setiap mengecek setiap file yang ada di setiap folder region dan menghilangkan path dan extension (.jpg) dari file tersebut lalu outputnya dimasukan ke dalam variabel. variabel "time" nanti digunakan untuk printing waktu saja (date, month, year, hour, minute, second).
+```
+#!/bin/bash
+path="/home/PuroFuro/gingseng/genshin_character"
+
+#Melakukan pengecekan untuk setiap file di masing-masing folder region
+for folder in $path/*; do
+  for file in $folder/*.jpg; do
+
+    #Fix untuk menghilangkan .jpg, name untuk menghilangkan path
+    fix=$(echo "${file%.*}")
+    name=$(echo "${file##*/}")
+
+    #Extract .txt dari .jpg tersebut
+    steghide extract -sf "$file" -xf "$fix".txt -p "" -q
+    string=$(cat "$fix.txt")
+
+    #Waktu saat command dilakukan
+    time=$(date '+%d/%m/%y %H:%M:%S')   
+```
+Ide yang dipakai untuk mencari secret urlnya adalah tulisan "aHR0cHM" yang merupakan kata "http" dalam base64. Condition di awal itu merupakan basis untuk menemukan secret image tersebut. Sleep 1 hanya untuk menjalankan kode setiap 1 detik.
+```
+    #aHR0cHM merupakan encode dari kata 'http'
+    if [[ $string == *aHR0cHM* ]]
+    then
+        #Decode file dan letakan waktu ke image.log
+        found=$(echo $string | base64 -d )
+        echo -e "\n$time: Found the secret file at $fix\nThe URL is $found"
+        echo "$time [FOUND] $fix" >> image.log
+        
+        #Download dari URL
+        wget --content-disposition $found
+        echo "$found" >> "/home/PuroFuro/gingseng/$name.txt"
+        rm -rf "$fix.txt"
+        exit 0
+    else
+        echo "$time Not this one.."
+        echo "$time [NOT FOUND] $fix" >> image.log
+        rm -rf "$fix.txt"
+    fi
+
+    sleep 1
+    done 
+
+done
+```
+### Proses pencarian file secret file
+![github-small](https://github.com/PuroFuro/image_for_sisop/blob/main/Screenshot_20240330_192301.png)
+
+### Ditemukannya secret file dan juga secret image
+![github-small](https://github.com/PuroFuro/image_for_sisop/blob/main/Screenshot_20240330_192332.png)
+## [SOAL 4](https://docs.google.com/document/d/140T6O_YsbBcnblkKqQ5lpN1ji_XQzSMEpAkkqHrtTyU/edit)
+
+### Penjelasan minute_log.sh
+Membuat banyak variabel yang akan membantu dalam substitution lalu echo tulisan (mem_total, dst) ke dalam path yang ditentukan dengan nama berupa waktu sesuai format.
+```
+#!/bin/bash
+
+dir=~
+#Variabel untuk command subs dengan nama date
+savedir="/home/PuroFuro/log/metrics_$(date +'%Y%m%d%H%M%S').log"
+
+#Command untuk cek memory dan disk
+C_disk=$(du -sh $dir)
+C_mem=$(free -m)
+echo "mem_total,mem_used,mem_free,mem_shared,mem_buff,mem_available,swap_total,swap_used,swap_free,path,path_size" >> $savedir
+```
+Loop dibawah ini mengambil setiap output yang ada di $C_mem yaitu variabel yang menyimpan output dari free -m dan meng-echo hanya hasil int saja ke dalam $savedir. Setelah itu output dari du -sh juga dimasukan ke $savedir dan file diberi permission untuk user read dengan command "chmod 400"
+```
+#Mengambil hanya output yang memiliki integer
+for output in $C_mem; do
+    if [[ $output =~ ^[0-9]+$ ]]; then
+        echo -n "$output," >> $savedir
+    fi
+done
+
+#Memasukan output c_disk ke log
+echo "$dir,${C_disk%%/*}" >> $savedir
+#Read only permission
+chmod 400 $savedir
+```
+Bawah ini hanyalah konfigurasi dari crontab yang jalan per menit
+```
+#crontab
+#* * * * * /home/PuroFuro/soal4/minute_log.sh
+```
+### Terbentuknya folder log di home directory
+![github-small](https://github.com/PuroFuro/image_for_sisop/blob/main/Screenshot_20240330_192609.png)
+
+### Terisinya folder tersebut dengan log file yang terbentuk dari minute_log.sh
+![github-small](https://github.com/PuroFuro/image_for_sisop/blob/main/Screenshot_20240330_192636.png)
+
+### Isi dari salah satu file yang dihasilkan minute_log.sh
+![github-small](https://github.com/PuroFuro/image_for_sisop/blob/main/Screenshot_20240330_192649.png)
+
+### Penjelasan aggregate_minutes_to_hourly_log.sh
+Karena di dalam folder log terdapat banyak file, maka isi dari file-file tersebut dimasukan ke dalam "file.txt" sementara untuk diproses. Lalu membuat variabel-variabel path yang membantu dalam substitution nanti.
+```
+#!/bin/bash
+#Membuat temporary file yang berisi semua yang telah dicatat di file .log
+for files in "/home/PuroFuro/log/metrics_2*.log"; do
+    for texts in $files; do
+        cat $texts >> temp.txt
+    done
+done
+
+#Variable path pembantu
+takedir="/home/PuroFuro/soal4/temp.txt"
+savedir="/home/PuroFuro/log/metrics_agg_$(date +'%Y%m%d%H').log"
+dir=~
+
+
+echo "type,mem_total,mem_used,mem_free,mem_shared,mem_buff,mem_available,swap_total,swap_used,swap_free,path,path_size" >> $savedir
+```
+Untuk mencari nilai Maximum, digunakan while loop yang akan berhenti jika output file berupa kosong. Di variabel logs, terdapat command awk untuk mencari nilai max dari file text sementara tadi di baris kedua saja yang berisi integer (NR%2==0). Lalu digunakan conditional statement untuk setiap column agar mendapatkan nilai maximum dari setiap column tersebut.
+```
+#for max search
+echo -n "minimum," >> $savedir
+j=1
+while [ 1 ]; do 
+
+    nu="$"$j""
+    nextcol="$"$((j+1))""
+    #Mencari data paling besar di column j dan hanya di line kedua saja
+    logs=$(awk -F, 'NR%2==0 {if('$nu' >= max) {max='$nu'}} END {print max}' $takedir)
+    nextlogs=$(awk -F, 'NR%2==0 {if('$nextcol' >= max) {max='$nextcol'}} END {print max}' $takedir)
+```
+If statement dibawah mengecek apabila output dari $logs merupakan kosong makan loop akan dihentikan dan "if [ -z $nextlogs ]" disini berguna untuk mengecek jika output $logs selanjutnya kosong atau tidak, apabila iya maka output $logs sekarang diprint tanpa koma.
+
+```
+    #Jika output kosong maka loop berhenti
+    if [ -z $logs ]; then
+        break;
+    else
+        #Jika next outputnya kosong maka print output sekarang tanpa koma
+        if [ -z $nextlogs ]; then
+            echo -e "$logs" >> $savedir
+        else
+            echo -n "$logs," >> $savedir
+        fi
+        j=$(( j + 1 ))
+    fi
+done
+```
+Untuk algoritma yang digunakan untuk mencari minimum sebenarnya sama saja dengan algoritma untuk mencari maximum, dan cara echonya ke folder path yang dituju juga sama
+```
+#Untuk min search
+echo -n "maximum," >> $savedir
+i=1
+while [ 1 ]; do
+
+
+    nu="$"$i""
+    nextcol="$"$((i+1))""
+    #Mencari data paling kecil di column i
+    logs=$(awk -F, 'min=="" || '$nu' < min {min='$nu'} END {OFS=",";print min}' $takedir)
+    nextlogs=$(awk -F, 'min=="" || '$nextcol' < min {min='$nextcol'} END {OFS=",";print min}' $takedir)
+
+    #Jika output kosong maka loop berhenti
+    if [ -z $logs ]; then
+        break
+    else
+        #Jika next outputnya kosong maka print output sekarang tanpa koma
+        if [ -z $nextlogs ]; then
+            echo -e "$logs" >> $savedir
+        else
+            echo -n "$logs," >> $savedir
+        fi
+        i=$(( i + 1 ))
+    fi
+    
+done
+```
+Untuk bagian comparing, diulang penggunaan algoritma untuk mencari min dan max lagi dengan kode dibawah ini jadi hanya meng-copas dari kode sebelumnya.
+```
+#for comparing
+i=1
+echo -n "average," >> $savedir
+while [ 1 ]; do
+
+    #min
+    nu="$"$i""
+    nextcol="$"$((i+1))""
+    logs1=$(awk -F, 'min=="" || '$nu' < min {min='$nu'} END {OFS=",";print min}' $takedir)
+    nextlogs=$(awk -F, 'min=="" || '$nextcol' < min {min='$nextcol'} END {OFS=",";print min}' $takedir)
+    #max  
+    logs2=$(awk -F, 'NR%2==0 {if('$nu' >= max) {max='$nu'}} END {print max}' $takedir)
+```
+Mengecek apabila salah satu output dari logs merupakan kosong maka loop berhenti dan pada saat i==10 maka akan print home directory dikarenakan directory merupakan string yang akan merusak kode perhitungan dibawah nanti
+```
+    if [ -z $logs2 ]; then
+        break;
+
+    #Print directory saat i==10
+    elif [[ $i == 10 ]]; then
+        echo -n "$dir," >> $savedir
+```
+Bagian ini hanya untuk cek bila output selanjutnya merupakan kosong dan jika iya maka output yang ada sekarang (e.g 29G) akan diambil dan dipisah integer dan stringnya agar dapat dipakai untuk perhitungan.
+```
+    else
+        #Jika next output kosong, maka mengubah output sekarang (yaitu integer dengan huruf) menjadi hanya integer untuk perhitungan
+        if [ -z $nextlogs ]; then
+
+            #Mengambil huruf dari salah satu min
+            logslet=${logs1//[0-9]/}
+            logs1=$(echo "$logs1" | grep -o '[0-9]\+')
+            logs2=$(echo "$logs2" | grep -o '[0-9]\+')
+        fi
+```
+Intinya, disini melakukan operasi pertamabahan dan juga pembagian dari output $logs2 dan $logs2 yang masing-masing merupakan min dan max. Modulo disini hanya dipakai untuk cek apakah jumlah dari kedua int merupakan ganjil atau tidak, karena jika ganjil maka hasilnya harus float.
+```
+        #Pertambahan
+        let plus=$logs1+$logs2
+        #Pengecekan angka genap atau ganjil
+        mod=$(($plus%2))
+
+        if [ $mod == 0 ];then
+
+            #Jika genap perhitungan normal
+            avg=`expr $plus / 2`
+
+            if [ -z $nextlogs ]; then
+                echo -n "$avg$logslet" >> $savedir
+            else
+            echo -n "$avg," >> $savedir
+            fi
+```
+Disini adalah kode yang digunakan apabila hasil jumlah dari kedua integer adalah ganjil, operasi pembagian yang dipakai menggunakan awk dengan "printf "%.1f"" ini ada angka tersebut memiliki 1 angka dibelakang koma.
+```
+        else
+
+            #Jika ganjil perhitungan menggunakan float
+            avg=$(awk 'BEGIN {printf "%.1f", '$plus' / 2}')
+
+            if [ -z $nextlogs ]; then
+                echo -n "$avg$logslet" >> $savedir
+            else
+                echo -n "$avg," >> $savedir
+            fi
+        fi
+    fi
+    i=$(( i + 1 ))
+done
+```
+Setelah semua itu selesai dilakukan maka setiap hasil output yang sudah difilter tadi akan diletakan pada $savedir dan file.txt sementara tadi dihapus
+```
+#remove temp.txt
+rm -rf temp.txt
+```
+Konfigurasi crontab yang menjalankan aggregate_minutes_to_hourly_log.sh setiap satu jam
+```
+#crontab
+#0 * * * * /home/PuroFuro/soal4/aggregate_minutes_to_hourly_log.sh
+```
+### Terbentuknya file metrics_agg setelah menjalankan .sh aggregate
+![github-small](https://github.com/PuroFuro/image_for_sisop/blob/main/Screenshot_20240330_192824.png)
+
+### Isi dari file tersebut yang berisi Minimum, Maximum, dan juga Average dari semua file metrics minute
+![github-small](https://github.com/PuroFuro/image_for_sisop/blob/main/Screenshot_20240330_192832.png)
