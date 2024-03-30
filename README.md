@@ -93,7 +93,7 @@ Baris terakhir ini menampilkan hasil dari fungsi `tampilkan_top_pembeli` dengan 
 
 Jadi, fungsi `tampilkan_top_pembeli` ini akan mencari nama pembeli dengan total penjualan tertinggi dari data dalam file `Sandbox.csv`, lalu menampilkannya ke layar.
 
-
+![github-small](https://github.com/bielnzar/Sisop/blob/main/a.png)
 
 
 #### B. Karena karena Cipung dan Abe ingin mengefisienkan penjualannya, mereka ingin merencanakan strategi penjualan untuk customer segment yang memiliki profit paling kecil. Tampilkan customer segment yang memiliki profit paling kecil
