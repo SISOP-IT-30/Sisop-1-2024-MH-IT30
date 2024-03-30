@@ -312,6 +312,127 @@ main() {
 main
 ```
 
+# Soal 2
+
+Oppie merupakan seorang peneliti bom atom, ia ingin merekrut banyak peneliti lain untuk mengerjakan proyek bom atom nya, Oppie memiliki racikan bom atom rahasia yang hanya bisa diakses penelitinya yang akan diidentifikasi sebagai user, Oppie juga memiliki admin yang bertugas untuk memanajemen peneliti,  bantulah oppie untuk membuat program yang akan memudahkan tugasnya 
+
+**A. Buatlah 2 program yaitu login.sh dan register.sh**
+
+**B. Setiap admin maupun user harus melakukan register terlebih dahulu menggunakan email, username, pertanyaan keamanan dan jawaban, dan password**
+
+![github-small](https://github.com/PuroFuro/image_for_sisop/blob/main/Screenshot_1.png)
+
+**c. Username yang dibuat bebas, namun email bersifat unique. setiap email yang mengandung kata admin akan dikategorikan menjadi admin**
+
+**d. Karena resep bom atom ini sangat rahasia Oppie ingin password nya memuat keamanan tingkat tinggi**
+
+Pada register.sh, terdapat bagian pengecekan password. Dari atas ke bawah, huruf kapital, huruf kecil, dan angka. Berikut kodenya :
+```bash
+is_valid_password() {
+    local password="$1"
+    local length=${#password}
+    local has_uppercase=$(echo "$password" | grep -q '[[:upper:]]' && echo true || echo false)
+    local has_lowercase=$(echo "$password" | grep -q '[[:lower:]]' && echo true || echo false)
+    local has_digit=$(echo "$password" | grep -q '[[:digit:]]' && echo true || echo false)
+
+    if [ $length -ge 8 ] && [ "$has_uppercase" == true ] && [ "$has_lowercase" == true ] && [ "$has_digit" == true ]; then
+        return 0   # valid
+    else
+        return 1   # invalid
+    fi
+}
+```
+
+Dan untuk enkripsi menggunakan base64 pada password :
+```bash
+encrypted_password=$(echo -n "$password" | base64)
+```
+
+**e. Karena Oppie akan memiliki banyak peneliti dan admin ia berniat untuk menyimpan seluruh data register yang ia lakukan ke dalam folder users file users.txt. Di dalam file tersebut, terdapat catatan seluruh email, username, pertanyaan keamanan dan jawaban, dan password hash yang telah ia buat.**
+
+Penginputan email, username, pertanyaan keamanan serta jawaban, dan password yang telah dienkripsi menggunakan base 64 pada users.txt :
+```bash
+echo "$email:$username:$security_question:$security_answer:$encrypted_password" >> users.txt
+```
+
+**f. Setelah melakukan register, program harus bisa melakukan login. Login hanya perlu dilakukan menggunakan email dan password.**
+
+![github-small](https://github.com/PuroFuro/image_for_sisop/blob/main/Screenshot_2.png)
+
+Mengecek apakah user ada dalam list users.txt :
+```bash
+user_exists() {
+    local email="$1"
+    if grep -q "^$email:" users.txt; then
+        return 0   # exists
+    else
+        return 1   # does not exist
+    fi
+}
+```
+Mengambil password dari user yang dimaksud dari users.txt lalu di dekripsi :
+```bash
+get_stored_password() {
+    local email="$1"
+    local stored_password=$(grep "^$email:" users.txt | cut -d ':' -f 5)
+    echo "$stored_password"
+}
+
+decrypt_password() {
+    local encrypted_password="$1"
+    echo "$encrypted_password" | base64 -d
+}
+```
+**g. Karena peneliti yang di rekrut oleh Oppie banyak yang sudah tua dan pelupa maka Oppie ingin ketika login akan ada pilihan lupa password dan akan keluar pertanyaan keamanan dan ketika dijawab dengan benar bisa memunculkan password**
+
+![github-small](https://github.com/PuroFuro/image_for_sisop/blob/main/Screenshot_3.png)
+
+Recovery password akan mengecek email dan jawaban dari pertanyaan keamanan, lalu menampilkan password. Tidak hanya itu, recovery juga akan mencatat sebuah log pada auth.log :
+```bash
+if user_exists "$email"; then
+        # Security question verification
+        stored_security_question=$(grep "^$email:" users.txt | cut -d ':' -f 3)
+        echo "Security Question: $stored_security_question"
+        echo "Enter your answer: "
+        read security_answer
+
+        stored_security_answer=$(grep "^$email:" users.txt | cut -d ':' -f 4)
+        if [ "$security_answer" == "$stored_security_answer" ]; then
+            stored_password=$(get_stored_password "$email")
+            decrypted_stored_password=$(decrypt_password "$stored_password")
+            echo "Your password is: $decrypted_stored_password"
+            log_message "PASSWORD RECOVERY SUCCESS" "Password for user with email $email recovered successfully"
+            exit 0
+        else
+            log_message "PASSWORD RECOVERY FAILED" "ERROR Incorrect security answer for user with email $email"
+            echo "Error: Incorrect security answer."
+            exit 1
+        fi
+```                     
+h. Setelah user melakukan login akan keluar pesan sukses, namun setelah seorang admin melakukan login Oppie ingin agar admin bisa menambah, mengedit (username, pertanyaan keamanan dan jawaban, dan password), dan menghapus user untuk memudahkan kerjanya sebagai admin. 
+
+![github-small](https://github.com/PuroFuro/image_for_sisop/blob/main/Screenshot_4.png)
+
+i. Ketika admin ingin melakukan edit atau hapus user, maka akan keluar input email untuk identifikasi user yang akan di hapus atau di edit
+
+![github-small](https://github.com/PuroFuro/image_for_sisop/blob/main/Screenshot_5.png)
+
+**j. Oppie ingin programnya tercatat dengan baik, maka buatlah agar program bisa mencatat seluruh log ke dalam folder users file auth.log, baik login ataupun register.**
+
+Contoh log berhasil pada register.sh
+```bash
+log_message "REGISTER SUCCESS" "User with email $email registered successfully"
+```
+
+Log yang telah dicatat selama pengetesan :
+
+![github-small](https://github.com/PuroFuro/image_for_sisop/blob/main/Screenshot_6.png)
+
+## Revisi
+
+- Penambahan fungsi admin pada login.sh
+- Perbaikan fungsi recovery password
+- Perbaikan fungsi login pada login.sh (kesalahan pada password yang belum di decrypt pada pencocokan)
 
 ## [SOAL 3](https://docs.google.com/document/d/140T6O_YsbBcnblkKqQ5lpN1ji_XQzSMEpAkkqHrtTyU/edit)
 ### Penjelasan awal.sh
