@@ -275,56 +275,6 @@ fi
 ![github-small](https://github.com/bielnzar/Sisop/blob/main/d.png)
 
 
-
-
-#### Untuk menampilkan semua hasil yang telah di proses
-
-```
-main() {
-
-    while true; do
-        clear
-        # Pilihan user untuk menjalankan fungsi yang diinginkan
-        echo
-        echo "Pilih fungsi yang ingin dijalankan:"
-        echo "a) Tampilkan nama pembeli dengan total penjualan paling tinggi"
-        echo "b) Cari customer segment dengan profit paling rendah"
-        echo "c) Tampilkan 3 kategori dengan total profit paling tinggi"
-        echo "d) Cari purchase date dan amount (quantity) dari pelanggan dengan nama 'adriaens'"
-        read -p "Masukkan pilihan (a/b/c/d): " pilihan
-        echo
-
-        case $pilihan in
-        a)
-            tampilkan_top_pembeli
-            echo
-            read -p "Tekan Enter untuk melanjutkan..."
-            ;;
-        b)
-            segmentprofit_terendah
-            echo
-            read -p "Tekan Enter untuk melanjutkan..."
-            ;;
-        c)
-            kategoriprofit_tertinggi
-            echo
-            read -p "Tekan Enter untuk melanjutkan..."
-            ;;
-        d)
-            mencaripesanan_adriaens
-            echo
-            read -p "Tekan Enter untuk melanjutkan..."
-            ;;
-        *) echo "Pilihan tidak valid." && break ;;
-        esac
-
-        clear
-    done
-}
-
-main
-```
-
 # Soal 2
 
 Oppie merupakan seorang peneliti bom atom, ia ingin merekrut banyak peneliti lain untuk mengerjakan proyek bom atom nya, Oppie memiliki racikan bom atom rahasia yang hanya bisa diakses penelitinya yang akan diidentifikasi sebagai user, Oppie juga memiliki admin yang bertugas untuk memanajemen peneliti,  bantulah oppie untuk membuat program yang akan memudahkan tugasnya 
