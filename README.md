@@ -10,9 +10,9 @@ Dosen pengampu : Ir. Muchammad Husni, M.Kom.
 
 ## Kelompok Praktikum [IT-30]
 
-- [Fico Simhanandi - 50272310](https://www.github.com/octokatherine)
+- [Fico Simhanandi - 50272310](https://github.com/PuroFuro)
+- [Jody Hezekiah - 5027221050](https://github.com/imnotjs)
 - [Nabiel Nizar Anwari - 5027231087](https://github.com/bielnzar)
-- [Jody Hezekiah - 5027221050](https://github.com/bielnzar)
 
 
 ## [SOAL 1](https://docs.google.com/document/d/140T6O_YsbBcnblkKqQ5lpN1ji_XQzSMEpAkkqHrtTyU/edit)
