@@ -10,9 +10,9 @@ Dosen pengampu : Ir. Muchammad Husni, M.Kom.
 
 ## Kelompok Praktikum [IT-30]
 
-- [Fico Simhanandi - 5027231030](https://github.com/PuroFuro)
-- [Jody Hezekiah - 5027221050](https://github.com/imnotjs)
+- [Fico Simhanandi - 50272310](https://www.github.com/octokatherine)
 - [Nabiel Nizar Anwari - 5027231087](https://github.com/bielnzar)
+- [Jody Hezekiah - ](https://github.com/bielnzar)
 
 
 ## [SOAL 1](https://docs.google.com/document/d/140T6O_YsbBcnblkKqQ5lpN1ji_XQzSMEpAkkqHrtTyU/edit)
@@ -47,7 +47,14 @@ tampilkan_top_pembeli() {
 
 Skrip shell ini memiliki sebuah fungsi bernama `tampilkan_top_pembeli()` yang berfungsi untuk menampilkan nama pembeli dengan total penjualan tertinggi dari data yang terdapat dalam file `Sandbox.csv`.
 
-Untuk Mendapatkan Nama Pembeli dengan Total Penjualan Tertinggi :
+
+
+Mendapatkan Nama Pembeli dengan Total Penjualan Tertinggi
+bash
+
+`top_sales=$(tail -n +2 Sandbox.csv | awk -F ',' '{print $6 "," $17}' | sort -t ',' -k2 -nr | head -n 1)`
+
+Untuk Mendapatkan Nama Pembeli dengan Total Penjualan Tertinggi
 
 1. Baris `#!/bin/bash` menunjukkan bahwa skrip akan dijalankan oleh program Bash, yang merupakan program yang digunakan untuk mengeksekusi perintah-perintah dalam sistem operasi Unix/Linux.
 
@@ -93,8 +100,11 @@ Baris terakhir ini menampilkan hasil dari fungsi `tampilkan_top_pembeli` dengan 
 
 Jadi, fungsi `tampilkan_top_pembeli` ini akan mencari nama pembeli dengan total penjualan tertinggi dari data dalam file `Sandbox.csv`, lalu menampilkannya ke layar.
 
-![github-small](https://github.com/bielnzar/Sisop/blob/main/a.png)
 
+
+
+
+![github-small](https://github.com/bielnzar/Sisop/blob/main/a.png)
 
 #### B. Karena karena Cipung dan Abe ingin mengefisienkan penjualannya, mereka ingin merencanakan strategi penjualan untuk customer segment yang memiliki profit paling kecil. Tampilkan customer segment yang memiliki profit paling kecil
 
@@ -163,7 +173,7 @@ Dalam contoh di atas, `-eq 1` digunakan untuk memeriksa apakah hasil evaluasi da
 
 Jadi, fungsi `segmentprofit_terendah` ini akan mencari customer segment dengan total profit terendah dari data dalam file `Sandbox.csv`, lalu menampilkannya ke layar.
 
-
+![github-small](https://github.com/bielnzar/Sisop/blob/main/b.png)
 #### C. Cipung dan Abe hanya akan membeli stok barang yang menghasilkan profit paling tinggi agar efisien. Tampilkan 3 category yang memiliki total profit paling tinggi 
 ```
 kategoriprofit_tertinggi() {
@@ -214,6 +224,8 @@ Fungsi menampilkan total profit untuk setiap kategori menggunakan perintah `echo
 
 Kesimpulan
 Jadi, fungsi `kategoriprofit_tertinggi` ini akan mencari tiga kategori dengan total profit tertinggi dari data dalam file Sandbox.csv, lalu menampilkannya ke layar.
+
+![github-small](https://github.com/bielnzar/Sisop/blob/main/c.png)
 #### D. Karena ada seseorang yang lapor kepada Cipung dan Abe bahwa pesanannya tidak kunjung sampai, maka mereka ingin mengecek apakah pesanan itu ada. Cari purchase date dan amount (quantity) dari nama adriaens
 ```
 mencaripesanan_adriaens() {
@@ -260,6 +272,7 @@ fi
 - Jika kosong, mencetak pesan bahwa tidak ada pesanan yang ditemukan.
 - Jika tidak kosong, mencetak tanggal pembelian dan jumlah barang yang dibeli oleh pelanggan dengan nama "adriaens".
 
+![github-small](https://github.com/bielnzar/Sisop/blob/main/d.png)
 
 
 
